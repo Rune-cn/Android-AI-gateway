@@ -294,6 +294,8 @@ data class AppUiState(
     val security: dev.aigw.core.security.SecuritySettings = dev.aigw.core.security.SecuritySettings(),
     /** 可选的悬浮窗保活是否开启（需「显示在其他应用上层」权限）。 */
     val overlayKeepAlive: Boolean = false,
+    /** 开机 / 应用更新后自动恢复网关（默认关）。 */
+    val startOnBoot: Boolean = false,
     /** 实时状态通知（仅网关有请求在途时显示）是否开启，默认开。 */
     val liveNotification: Boolean = true,
     /** 模型开放名单：只对外暴露勾选的模型。 */
@@ -348,6 +350,7 @@ private class Snapshot(
     val failover: dev.aigw.core.failover.ModelFailoverSettings,
     val overlayKeepAlive: Boolean,
     val liveNotification: Boolean,
+    val startOnBoot: Boolean,
 )
 
 class AppViewModel(
@@ -435,6 +438,9 @@ class AppViewModel(
         // 调用记录与统计改在引擎后台预载（冷启动不阻塞主线程），就绪后补一次刷新
         engine.setStartupDataReadyListener { refresh() }
         refresh()
+        // 被系统强停过（force-stop 会清掉粘性服务与所有定时唤醒）时，打开应用就地恢复，
+        // 不再要求用户多点一次「启动网关服务」。
+        maybeAutoResume()
         // 自动检查更新：默认开启，每天最多一次，失败静默
         maybeAutoCheckUpdate()
     }
@@ -476,6 +482,7 @@ class AppViewModel(
                     failover = engine.failoverSettings(),
                     overlayKeepAlive = dev.aigw.app.data.KeepAlivePrefs.overlayEnabled(engine.store()),
                     liveNotification = dev.aigw.app.data.KeepAlivePrefs.liveNotificationEnabled(engine.store()),
+                    startOnBoot = dev.aigw.app.data.KeepAlivePrefs.startOnBoot(engine.store()),
                 )
             }
             _state.value = _state.value.copy(
@@ -501,6 +508,7 @@ class AppViewModel(
                 failover = snapshot.failover,
                 overlayKeepAlive = snapshot.overlayKeepAlive,
                 liveNotification = snapshot.liveNotification,
+                startOnBoot = snapshot.startOnBoot,
             )
         }
     }
@@ -702,15 +710,33 @@ class AppViewModel(
                 // 引擎没起来就撤掉前台通知，避免「通知说运行中、端口没人听」
                 app.stopService(Intent(app, GatewayService::class.java))
                 _state.value = _state.value.copy(notice = "启动失败：$error")
+            } else {
+                // 兜底：若服务在启动竞态里先退了（onStartCommand 时引擎还没就绪会
+                // stopSelf），这里把服务再拉回来——引擎在跑就必须有服务看管，
+                // 否则又回到「端口开着、无人看管」的孤儿态。onStartCommand 幂等。
+                ContextCompat.startForegroundService(app, Intent(app, GatewayService::class.java))
+                dev.aigw.app.data.KeepAlivePrefs.setWantRunning(engine.store(), true)
             }
             refresh()
             requestTileUpdate()
         }
     }
 
+    /**
+     * 应用打开时恢复上次状态（见 [dev.aigw.app.data.KeepAlivePrefs.wantRunning]）。
+     * 只在意图为真、且引擎确实没在跑时动作一次，不会与用户手动操作打架。
+     */
+    private fun maybeAutoResume() {
+        if (engine.isRunning()) return
+        if (!dev.aigw.app.data.KeepAlivePrefs.wantRunning(engine.store())) return
+        startGateway()
+        _state.value = _state.value.copy(notice = "已自动恢复上次的运行状态")
+    }
+
     fun stopGateway() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) { engine.stop() }
+            dev.aigw.app.data.KeepAlivePrefs.setWantRunning(engine.store(), false)
             app.stopService(Intent(app, GatewayService::class.java))
             _state.value = _state.value.copy(notice = "服务已停止")
             refresh()
@@ -775,6 +801,22 @@ class AppViewModel(
                 dev.aigw.app.service.FloatingKeepAlive.hide(app)
                 notice("悬浮窗保活已关闭")
             }
+            refresh()
+        }
+    }
+
+    /**
+     * 开关「开机自动恢复」：落盘后由 [dev.aigw.app.service.GatewayBootReceiver] 在
+     * BOOT_COMPLETED / MY_PACKAGE_REPLACED 时读取并拉起前台服务。
+     *
+     * 只影响「下次开机」；当前这次运行不受影响，所以这里不碰服务。
+     */
+    fun setStartOnBoot(enabled: Boolean) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                dev.aigw.app.data.KeepAlivePrefs.setStartOnBoot(engine.store(), enabled)
+            }
+            notice(if (enabled) "已开启：手机重启或应用更新后自动恢复网关" else "已关闭：重启后不会自动恢复网关")
             refresh()
         }
     }
