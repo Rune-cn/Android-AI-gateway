@@ -8,17 +8,44 @@ plugins {
 }
 
 /**
- * release 签名：从 keystore.properties 读，仅在文件存在时装配。
+ * release 签名：优先读 `keystore.properties`，其次读环境变量。
  *
- * 本地开发只出 debug 包，不需要 keystore.properties；云端发版时才由 CI 现生成该文件。
- * 文件缺失时不在配置阶段报错，但 release 构建会因无签名配置而失败——正是期望行为。
+ * 两条路径各有用途：
+ *  - 本地：把凭证写进根目录 keystore.properties（已在 .gitignore 中排除）；
+ *  - CI：密钥库从 GitHub Secrets 还原成文件，密码直接以环境变量传入，
+ *    磁盘上不落明文配置文件。
+ *
+ * 两者都没有时不做任何签名装配——此时 release 构建会失败并提示缺少签名，
+ * 这是期望行为：未签名的 release 包本来就装不上。
  */
 val keystoreProps = Properties().apply {
     val file = rootProject.file("keystore.properties")
     if (file.exists()) file.inputStream().use { load(it) }
 }
 
-val hasReleaseKeystore = rootProject.file("keystore.properties").exists()
+/** 读签名项：properties 优先，环境变量兜底；都没有则返回 null。 */
+fun signingValue(propKey: String, envKey: String): String? =
+    keystoreProps.getProperty(propKey) ?: System.getenv(envKey)?.takeIf { it.isNotBlank() }
+
+val releaseStoreFile: File? = (keystoreProps.getProperty("storeFile") ?: System.getenv("RELEASE_STORE_FILE"))
+    ?.let { File(it) }
+    ?.takeIf { it.isFile }
+
+val releaseStorePassword = signingValue("storePassword", "RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = signingValue("keyAlias", "RELEASE_KEY_ALIAS")
+val releaseKeyPassword = signingValue("keyPassword", "RELEASE_KEY_PASSWORD")
+
+/** 四项齐全才认为可以签 release。 */
+val hasReleaseSigning: Boolean =
+    releaseStoreFile != null && releaseStorePassword != null &&
+        releaseKeyAlias != null && releaseKeyPassword != null
+
+/** 兼容旧行为：只要存在 keystore.properties 就尝试装配（缺项时给出明确错误）。 */
+val hasReleaseKeystore: Boolean = hasReleaseSigning
+
+fun keystoreValue(key: String): String =
+    keystoreProps.getProperty(key)
+        ?: error("缺少签名配置 $key：请检查根目录 keystore.properties 或对应的 CI 环境变量")
 
 /**
  * debug 签名用的固定 keystore：从 keystore.properties 的 `debugStoreFile` 读，不存在则不装配。
@@ -28,10 +55,6 @@ val hasReleaseKeystore = rootProject.file("keystore.properties").exists()
  */
 val debugKeystoreFile: File? =
     keystoreProps.getProperty("debugStoreFile")?.let { File(it) }?.takeIf { it.isFile }
-
-fun keystoreValue(key: String): String =
-    keystoreProps.getProperty(key)
-        ?: error("缺少签名配置 $key：请检查根目录 keystore.properties")
 
 android {
     namespace = "app.ai.rune.ziyong.transfer"
@@ -52,12 +75,17 @@ android {
     }
 
     signingConfigs {
-        if (hasReleaseKeystore) {
+        if (hasReleaseSigning) {
             create("release") {
-                storeFile = file(keystoreValue("storeFile"))
-                storePassword = keystoreValue("storePassword")
-                keyAlias = keystoreValue("keyAlias")
-                keyPassword = keystoreValue("keyPassword")
+                storeFile = releaseStoreFile
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+                // v1/v2/v3 全开：老设备与各应用商店对签名方案的识别并不统一，
+                // 只开 v2 会让少数老 ROM 报「解析包时出现问题」
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
             }
         }
         if (debugKeystoreFile != null) {

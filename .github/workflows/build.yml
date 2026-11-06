@@ -1,9 +1,9 @@
 name: Build
 
 # 触发策略：
-# - push 到 main（含合并）→ 构建 debug + release 并上传产物
-# - PR → 只构建 debug、跑单元测试，不做签名与发版
-# - 手动触发 → 可指定是否同时跑 core 单测
+# - push 到 main → 构建 debug + release（release 需签名 Secrets），并上传产物
+# - PR → 只跑 :core 单测 + debug，不签名、不发版
+# - 手动触发 → 可指定是否跑单测
 on:
   push:
     branches: [main]
@@ -25,7 +25,7 @@ permissions:
   contents: read
 
 env:
-  # 统一 JDK：AGP 9 要求 JDK 17+，这里用 21（LTS，与 Gradle 9 官方推荐一致）
+  # AGP 9 要求 JDK 17+，这里用 21（LTS，与 Gradle 9 官方推荐一致）
   JAVA_VERSION: "21"
 
 jobs:
@@ -47,20 +47,16 @@ jobs:
       - name: 配置 Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          # 缓存 ~/.gradle，显著缩短二次构建时间；不要与 checkout 的缓存混用
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      # Android SDK：runner 自带 SDK 目录，这里只补装需要的 platform / build-tools。
-      # 注意：API 37 的包名带小版本（platforms;android-37.1 / 37.2），不存在裸的 android-37。
-      # 「.0」小版本在 37 之后不再单独发布，因此这里直接装 37.2 并在工程里把 compileSdk 设为 37。
+      # API 37 的 platform 包名带小版本（platforms;android-37.1 / 37.2），没有裸的 android-37。
+      # 这里按可用性择一安装，避免上游小版本变化后构建失效。
       - name: 安装 Android SDK 组件
         run: |
           set -euo pipefail
           SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
-          echo "SDK_ROOT=$SDK_ROOT"
           SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
-          # 37 的首个小版本号在不同时间点是 37.1 或 37.2，按可用性择一安装
           PICK=""
           for p in "platforms;android-37.2" "platforms;android-37.1" "platforms;android-36"; do
             if "$SDKMANAGER" --list 2>/dev/null | grep -q "^  *$p "; then PICK="$p"; break; fi
@@ -70,7 +66,6 @@ jobs:
           "$SDKMANAGER" --install "$PICK" "build-tools;37.0.0" "platform-tools"
 
       - name: 运行 :core 单元测试
-        # PR 默认跑；手动触发时可关闭（用于只想要产物的场景）
         if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.run_core_tests)
         run: ./gradlew :core:test --stacktrace
 
@@ -85,23 +80,35 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      # release 需要签名配置；仓库里没有 keystore 时跳过，只出 debug 包。
-      - name: 检查签名配置
+      # ---- Release：密钥库从 Secrets 还原，密码只以环境变量传递，不在磁盘落明文配置 ----
+      - name: 还原签名密钥库
         id: signing
+        if: github.event_name != 'pull_request'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
         run: |
-          if [ -f keystore.properties ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
+          set -euo pipefail
+          if [ -z "${KEYSTORE_BASE64:-}" ]; then
             echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::未提供 keystore.properties，跳过 release 构建"
+            echo "::warning::未配置 RELEASE_KEYSTORE_BASE64，跳过 release 构建"
+            exit 0
           fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          # 只校验文件存在与可读，不打印任何凭证
+          test -s "$RUNNER_TEMP/release.jks"
+          echo "RELEASE_STORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+          echo "available=true" >> "$GITHUB_OUTPUT"
 
       - name: 构建 Release APK
-        if: steps.signing.outputs.available == 'true' && github.event_name != 'pull_request'
+        if: steps.signing.outputs.available == 'true'
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: ./gradlew :app:assembleRelease --stacktrace
 
       - name: 上传 Release APK
-        if: steps.signing.outputs.available == 'true' && github.event_name != 'pull_request'
+        if: steps.signing.outputs.available == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: r-transfer-release
@@ -109,7 +116,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      # 构建失败时把完整日志留成产物，省得来回翻 Actions 页面。
+      # 构建失败时把报告与日志留成产物，省得来回翻 Actions 页面。
       - name: 收集失败日志
         if: failure()
         uses: actions/upload-artifact@v4

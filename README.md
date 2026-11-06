@@ -58,7 +58,21 @@
 
 ## 签名与发版
 
-release 包需要根目录的 `keystore.properties`：
+release 包需要一份签名密钥库。工程已把密钥库与密码写入**仓库 Secrets**（仅 CI 可见）：
+
+| Secret | 作用 |
+|---|---|
+| `RELEASE_KEYSTORE_BASE64` | 密钥库文件的 base64 内容 |
+| `RELEASE_STORE_PASSWORD` | 密钥库口令 |
+| `RELEASE_KEY_ALIAS` | 密钥别名 |
+| `RELEASE_KEY_PASSWORD` | 密钥口令 |
+
+CI 只在构建时把密钥库还原到临时目录（`$RUNNER_TEMP`），密码通过环境变量传入，
+**仓库里不存在明文凭证**，构建结束后临时文件随 runner 销毁。
+
+推送 `main` 即可产出 release 包；缺少上述 Secrets 时 workflow 会跳过 release 并给出 warning。
+
+本地出 release 包时，在根目录创建 `keystore.properties`（已被 `.gitignore` 排除）：
 
 ```properties
 storeFile=release.jks
@@ -67,8 +81,9 @@ keyAlias=...
 keyPassword=...
 ```
 
-文件不存在时，workflow 会自动跳过 release 构建，只产出 debug 包。
-`keystore.properties` 与密钥库文件均已在 `.gitignore` 中排除，请通过仓库 Secrets 或发布流水线注入。
+> ⚠️ 这份密钥库是自签名调试用证书，**不能用于上架应用商店**（商店要求正式发行证书），
+> 也请勿把它的口令复用到其它项目。若要换用正式证书，替换上述四个 Secret 即可，
+> 代码与 workflow 无需改动。
 
 ## 许可
 
