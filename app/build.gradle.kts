@@ -35,7 +35,9 @@ fun keystoreValue(key: String): String =
 
 android {
     namespace = "app.ai.rune.ziyong.transfer"
+    // AGP 9 支持 minor 版本号：platform 包名为 platforms;android-37.x
     compileSdk = 37
+    compileSdkMinor = 2
 
     defaultConfig {
         applicationId = "app.ai.rune.ziyong.transfer"

@@ -51,17 +51,23 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       # Android SDK：runner 自带 SDK 目录，这里只补装需要的 platform / build-tools。
-      # AGP 9.5 默认 build-tools 36.0.0，compileSdk 37。
+      # 注意：API 37 的包名带小版本（platforms;android-37.1 / 37.2），不存在裸的 android-37。
+      # 「.0」小版本在 37 之后不再单独发布，因此这里直接装 37.2 并在工程里把 compileSdk 设为 37。
       - name: 安装 Android SDK 组件
         run: |
           set -euo pipefail
           SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
           echo "SDK_ROOT=$SDK_ROOT"
-          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
-          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install \
-            "platforms;android-37" \
-            "build-tools;36.0.0" \
-            "platform-tools"
+          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
+          # 37 的首个小版本号在不同时间点是 37.1 或 37.2，按可用性择一安装
+          PICK=""
+          for p in "platforms;android-37.2" "platforms;android-37.1" "platforms;android-36"; do
+            if "$SDKMANAGER" --list 2>/dev/null | grep -q "^  *$p "; then PICK="$p"; break; fi
+          done
+          if [ -z "$PICK" ]; then echo "::error::找不到可用的 Android platform 包"; exit 1; fi
+          echo "将安装: $PICK"
+          "$SDKMANAGER" --install "$PICK" "build-tools;37.0.0" "platform-tools"
 
       - name: 运行 :core 单元测试
         # PR 默认跑；手动触发时可关闭（用于只想要产物的场景）
