@@ -31,6 +31,7 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ExpandLess
 import top.yukonga.miuix.kmp.icon.extended.ExpandMore
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 
 /** 账号状态文案：只有凭证失效与手动停用两种异常态，正常即「可用」。 */
 fun accountStatusText(account: AccountStatus): String = when {
@@ -170,7 +171,7 @@ fun AccountDeleteRow(
             text = "删除账号",
             onClick = { confirm = true },
             minWidth = 0.dp,
-            colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColors(
+            colors = ButtonDefaults.textButtonColors(
                 textColor = MiuixTheme.colorScheme.error,
             ),
         )

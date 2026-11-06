@@ -34,6 +34,7 @@ import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 /**
  * 通用展示组件。
@@ -65,9 +66,9 @@ fun SectionCard(
             cornerRadius = 16.dp,
             colors = CardDefaults.defaultColors(),
             pressFeedbackType = if (pressable) {
-                top.yukonga.miuix.kmp.utils.PressFeedbackType.Sink
+                PressFeedbackType.Sink
             } else {
-                top.yukonga.miuix.kmp.utils.PressFeedbackType.None
+                PressFeedbackType.None
             },
             onClick = onClick,
             content = content,

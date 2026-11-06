@@ -33,6 +33,7 @@ import top.yukonga.miuix.kmp.window.WindowDialog
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 
 /**
  * 安全防护与风控设置页。
@@ -236,7 +237,7 @@ private fun EvidenceSheet(
                         text = "清空",
                         onClick = onClear,
                         minWidth = 0.dp,
-                        colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColors(
+                        colors = ButtonDefaults.textButtonColors(
                             textColor = MiuixTheme.colorScheme.error,
                         ),
                     )
@@ -377,7 +378,7 @@ private fun RateLimitEditDialog(
                         onConfirm(min.coerceIn(0L, 60_000L), jitter.coerceIn(0L, 10_000L))
                     },
                     modifier = Modifier.weight(1f),
-                    colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
                 )
             }
         }

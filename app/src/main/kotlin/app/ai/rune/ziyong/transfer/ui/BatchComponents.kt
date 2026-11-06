@@ -16,6 +16,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 
 /**
  * 批量动作的进度卡：显示「已完成 X/N（当前：某账号）」与一条细进度条。
@@ -106,7 +107,7 @@ fun BatchOutcomeDialog(outcome: BatchOutcome, onDismiss: () -> Unit) {
                 text = "知道了",
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth(),
-                colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                colors = ButtonDefaults.textButtonColorsPrimary(),
             )
         }
     }

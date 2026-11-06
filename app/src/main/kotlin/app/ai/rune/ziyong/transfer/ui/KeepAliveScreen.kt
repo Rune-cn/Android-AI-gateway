@@ -28,6 +28,7 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import app.ai.rune.ziyong.transfer.ui.theme.SuccessGreen
 
 /**
  * 保活与权限：把网关在后台持续运行所需的系统条件逐项检测出来，并给出一键跳转。

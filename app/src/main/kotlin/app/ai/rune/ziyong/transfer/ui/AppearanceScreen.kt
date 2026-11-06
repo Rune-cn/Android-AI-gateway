@@ -54,6 +54,7 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.sin
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 
 /** 页面底色预设：hex 为 null 表示不覆盖（用默认底色）。 */
 private data class BgPreset(val label: String, val hex: String?)
@@ -184,7 +185,7 @@ fun AppearanceThemeScreen(state: AppUiState, viewModel: AppViewModel, onBack: ()
             text = "重置默认",
             onClick = { viewModel.resetAppearance() },
             modifier = Modifier.fillMaxWidth(),
-            colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColors(
+            colors = ButtonDefaults.textButtonColors(
                 textColor = MiuixTheme.colorScheme.error,
             ),
         )

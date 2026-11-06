@@ -55,6 +55,7 @@ import top.yukonga.miuix.kmp.icon.extended.ExpandMore
 import top.yukonga.miuix.kmp.icon.extended.Refresh
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 
 /** 模型页：汇总所有供应商的模型（id 带 `provider/` 前缀），按供应商分组展示与流式更新。 */
 @Composable
@@ -227,7 +228,7 @@ fun ModelsScreen(state: AppUiState, viewModel: AppViewModel) {
                     text = "关闭",
                     onClick = { failureDetail = null },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
                 )
             }
         }

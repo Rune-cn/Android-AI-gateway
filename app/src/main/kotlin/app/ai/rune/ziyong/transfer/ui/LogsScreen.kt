@@ -57,6 +57,10 @@ import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import app.ai.rune.ziyong.transfer.ui.theme.SuccessGreen
+import androidx.compose.foundation.clickable
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 
 private enum class LogTab(val label: String) { Calls("调用记录"), Requests("请求日志") }
 
@@ -108,7 +112,7 @@ fun LogsScreen(state: AppUiState, viewModel: AppViewModel) {
         }
     }
 
-    val scrollBehavior = top.yukonga.miuix.kmp.basic.MiuixScrollBehavior()
+    val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
         modifier = Modifier.fillMaxWidth(),
         topBar = {
@@ -655,7 +659,7 @@ private fun CallLogSettings(state: AppUiState, viewModel: AppViewModel) {
             text = "清空调用记录",
             onClick = { confirmClear = true },
             modifier = Modifier.fillMaxWidth(),
-            colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColors(
+            colors = ButtonDefaults.textButtonColors(
                 textColor = MiuixTheme.colorScheme.error,
             ),
         )
@@ -740,7 +744,7 @@ private fun RequestLogSettings(state: AppUiState, viewModel: AppViewModel) {
             text = "清空请求日志",
             onClick = { confirmClearLogs = true },
             modifier = Modifier.fillMaxWidth(),
-            colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColors(
+            colors = ButtonDefaults.textButtonColors(
                 textColor = MiuixTheme.colorScheme.error,
             ),
         )

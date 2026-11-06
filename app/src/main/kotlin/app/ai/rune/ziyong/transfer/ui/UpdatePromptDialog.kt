@@ -21,6 +21,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 
 /**
  * 发现新版本时的更新弹窗。
@@ -165,7 +166,7 @@ fun UpdatePromptDialog(state: AppUiState, viewModel: AppViewModel) {
                         }
                     },
                     modifier = Modifier.weight(1f),
-                    colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
                 )
             }
         }

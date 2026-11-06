@@ -18,6 +18,7 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ChevronForward
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 /**
  * 额度中心：列出有账号的供应商，点进去看该供应商各账号的额度包明细。
@@ -43,7 +44,7 @@ fun CreditCenterScreen(state: AppUiState, onOpen: (String) -> Unit, onBack: () -
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { onOpen(info.id) },
-                pressFeedbackType = top.yukonga.miuix.kmp.utils.PressFeedbackType.Sink,
+                pressFeedbackType = PressFeedbackType.Sink,
                 insideMargin = androidx.compose.foundation.layout.PaddingValues(16.dp),
                 cornerRadius = 16.dp,
                 colors = CardDefaults.defaultColors(),

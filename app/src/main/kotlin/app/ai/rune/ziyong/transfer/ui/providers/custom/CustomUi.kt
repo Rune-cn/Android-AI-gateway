@@ -43,6 +43,7 @@ import top.yukonga.miuix.kmp.icon.extended.ExpandMore
 import top.yukonga.miuix.kmp.icon.extended.Layers
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowBottomSheet
+import androidx.compose.foundation.layout.height
 
 /**
  * 自定义供应商（任意 OpenAI 兼容端点）。

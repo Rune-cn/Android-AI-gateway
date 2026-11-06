@@ -29,6 +29,7 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.ChevronForward
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 /**
  * 供应商列表：每个供应商一张卡片（图标、说明、账号统计），点进详情。
@@ -85,7 +86,7 @@ fun ProviderListScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { onOpen(provider.id) },
-                pressFeedbackType = top.yukonga.miuix.kmp.utils.PressFeedbackType.Sink,
+                pressFeedbackType = PressFeedbackType.Sink,
                 insideMargin = androidx.compose.foundation.layout.PaddingValues(16.dp),
                 cornerRadius = 16.dp,
                 colors = CardDefaults.defaultColors(),

@@ -22,6 +22,7 @@ import app.ai.rune.ziyong.transfer.service.GatewayTileService
 import app.ai.rune.ziyong.transfer.ui.AppRoot
 import app.ai.rune.ziyong.transfer.ui.AppViewModel
 import app.ai.rune.ziyong.transfer.ui.theme.RTransferTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * 唯一的 Activity：承载 Compose 界面。
@@ -57,7 +58,7 @@ class MainActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.surface),
+                        .background(MiuixTheme.colorScheme.surface),
                 ) {
                     AppRoot(vm, state)
                 }

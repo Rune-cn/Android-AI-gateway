@@ -25,6 +25,7 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 
 /**
  * 并发与容错设置页：
@@ -421,7 +422,7 @@ private fun EditDialogScaffold(
                     text = "保存",
                     onClick = onConfirm,
                     modifier = Modifier.weight(1f),
-                    colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
                 )
             }
         }

@@ -30,6 +30,8 @@ import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.ChevronForward
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
+import androidx.compose.foundation.clickable
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 
 /**
  * 「我的」页：设置入口的集合。
@@ -350,7 +352,7 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                 text = "关闭",
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth(),
-                colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                colors = ButtonDefaults.textButtonColorsPrimary(),
             )
         }
     }
