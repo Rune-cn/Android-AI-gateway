@@ -316,7 +316,7 @@ private fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 private fun Modifier.clickableCompat(onClick: () -> Unit): Modifier =
-    this.then(androidx.compose.foundation.clickable(onClick = onClick))
+    this.clickable(onClick = onClick)
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable

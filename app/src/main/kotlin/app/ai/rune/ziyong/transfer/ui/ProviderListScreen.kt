@@ -68,17 +68,13 @@ fun ProviderListScreen(
             return@PageScaffold
         }
 
-        // 图标底色渐变整页只建一次，不随每张卡片重建
-        val iconBrush = remember(
-            MiuixTheme.colorScheme.primaryContainer,
-            MiuixTheme.colorScheme.secondaryContainer,
-        ) {
-            Brush.linearGradient(
-                listOf(
-                    MiuixTheme.colorScheme.primaryContainer,
-                    MiuixTheme.colorScheme.secondaryContainer,
-                ),
-            )
+        // 图标底色渐变整页只建一次，不随每张卡片重建。
+        // 注意：readOnly 的 colorScheme 取值必须先读进局部变量，
+        // 不能写在 remember 的 lambda 里（Composable 调用不能出现在 lambda 上下文中）。
+        val primaryContainer = MiuixTheme.colorScheme.primaryContainer
+        val secondaryContainer = MiuixTheme.colorScheme.secondaryContainer
+        val iconBrush = remember(primaryContainer, secondaryContainer) {
+            Brush.linearGradient(listOf(primaryContainer, secondaryContainer))
         }
 
         for (provider in state.providers) {
