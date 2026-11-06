@@ -1,0 +1,53 @@
+# R 中转 · 版本目录
+#
+# 全部使用「最新正式版」，不含任何 alpha / beta / rc / SNAPSHOT：
+#   AGP 9.5.1 · Kotlin 2.4.21 · Compose BOM 2026.09.00 · miuix 0.9.4
+#
+# 重要：AGP 9 起 Kotlin 支持内置于 AGP（android.builtInKotlin 默认开启），
+# 因此本工程**不再应用** org.jetbrains.kotlin.android 插件——AGP 9 的
+# 新 DSL 与它会直接冲突。Kotlin 版本通过根 build.gradle.kts 里
+# buildscript classpath 提升到 2.4.21（AGP 自带的是 2.2.10）。
+
+[versions]
+agp = "9.5.1"
+kotlin = "2.4.21"
+composeBom = "2026.09.00"
+miuix = "0.9.4"
+coreKtx = "1.19.1"
+browser = "1.10.0"
+activityCompose = "1.13.0"
+lifecycle = "2.11.0"
+securityCrypto = "1.1.0"
+gson = "2.15.0"
+nanohttpd = "2.3.1"
+
+[libraries]
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+# Material3 仅作为 Compose 主题与少量基础类型的承担者；本工程不使用其任何 UI 组件。
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+
+# miuix：本工程的整套视觉层
+miuix-core = { module = "top.yukonga.miuix.kmp:miuix-core-android", version.ref = "miuix" }
+miuix-ui = { module = "top.yukonga.miuix.kmp:miuix-ui-android", version.ref = "miuix" }
+miuix-icons = { module = "top.yukonga.miuix.kmp:miuix-icons-android", version.ref = "miuix" }
+
+# 图标补充：miuix 图标集未覆盖的语义图标（仅取矢量定义，不引入 Material3 组件）
+androidx-compose-material-icons = { module = "androidx.compose.material:material-icons-extended", version = "1.7.8" }
+
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+nanohttpd = { module = "org.nanohttpd:nanohttpd", version.ref = "nanohttpd" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+# AGP 9 内置 Kotlin 下，Compose 仍需独立应用编译器插件（版本须与 KGP 一致）
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

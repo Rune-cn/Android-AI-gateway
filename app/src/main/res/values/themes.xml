@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 深色底（配绿色前景）；页背景保持浅色 -->
+    <color name="ic_launcher_background">#0A0B0D</color>
+    <color name="page_background">#F3F6FB</color>
+
+    <!--
+      窗口主题只负责「Compose 起画之前」的那一帧：背景色、状态栏透明与图标明暗。
+      真正的配色由 MiuixTheme 在 Compose 内接管，这里刻意不引入任何 Material 组件样式。
+    -->
+    <style name="Theme.RTransfer" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/page_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>
