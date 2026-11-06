@@ -683,7 +683,6 @@ fun RetentionField(current: Int, onCommit: (Int) -> Unit) {
     val parsed = text.toIntOrNull()
     val valid = parsed != null &&
         parsed in GatewaySettings.MIN_RETENTION_DAYS..GatewaySettings.MAX_RETENTION_DAYS
-    val changed = parsed != null && parsed != current
 
     TextField(
         value = text,
@@ -706,12 +705,12 @@ fun RetentionField(current: Int, onCommit: (Int) -> Unit) {
             color = MiuixTheme.colorScheme.error,
         )
     }
-    if (changed && parsed != null) {
+    // 在进入条件判断前固化成局部 val：既让智能转换成立，也避免在 lambda 里重复判空
+    val committed = parsed?.takeIf { valid && it != current }
+    if (committed != null) {
         TextButton(
             text = "保存保留天数",
-            // parsed 在上面的 if 中已判空（changed 本身就蕴含 parsed != null），
-            // 这里用局部值避免智能转换在 lambda 中失效
-            onClick = { parsed?.let(onCommit) },
+            onClick = { onCommit(committed) },
             modifier = Modifier.fillMaxWidth(),
         )
     }
