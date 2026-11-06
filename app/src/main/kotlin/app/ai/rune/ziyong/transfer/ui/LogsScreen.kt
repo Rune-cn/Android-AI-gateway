@@ -28,8 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -444,7 +442,7 @@ private fun StatusBadge(status: CallStatus) {
 
 @Composable
 private fun CallDetailSheet(record: CallRecord, viewModel: AppViewModel) {
-    val clipboard = LocalClipboardManager.current
+    val copyText = rememberTextCopier()
 
     // 打开抽屉时后台加载各字段完整原文：没溢出文件（未超摘要长度或已被清理）时回落用记录内摘要。
     var fullRequest by remember(record.id) { mutableStateOf<String?>(null) }
@@ -484,21 +482,21 @@ private fun CallDetailSheet(record: CallRecord, viewModel: AppViewModel) {
             "请求原文",
             fullRequest ?: record.requestBody,
             truncatedNote(fullRequest == null, record.requestBody),
-        ) { clipboard.setText(AnnotatedString(fullRequest ?: record.requestBody)) }
+        ) { copyText(fullRequest ?: record.requestBody) }
         DetailBlock(
             "响应原文",
             fullResponse ?: record.responseBody,
             truncatedNote(fullResponse == null, record.responseBody),
-        ) { clipboard.setText(AnnotatedString(fullResponse ?: record.responseBody)) }
+        ) { copyText(fullResponse ?: record.responseBody) }
         if (record.rawResponse.isNotEmpty() || fullRaw != null) {
             DetailBlock(
                 "返回原文（上游报文）",
                 fullRaw ?: record.rawResponse,
                 truncatedNote(fullRaw == null, record.rawResponse),
-            ) { clipboard.setText(AnnotatedString(fullRaw ?: record.rawResponse)) }
+            ) { copyText(fullRaw ?: record.rawResponse) }
         }
         if (record.error.isNotEmpty()) {
-            DetailBlock("错误", record.error, null) { clipboard.setText(AnnotatedString(record.error)) }
+            DetailBlock("错误", record.error, null) { copyText(record.error) }
         }
     }
 }
@@ -711,7 +709,9 @@ fun RetentionField(current: Int, onCommit: (Int) -> Unit) {
     if (changed && parsed != null) {
         TextButton(
             text = "保存保留天数",
-            onClick = { onCommit(parsed) },
+            // parsed 在上面的 if 中已判空（changed 本身就蕴含 parsed != null），
+            // 这里用局部值避免智能转换在 lambda 中失效
+            onClick = { parsed?.let(onCommit) },
             modifier = Modifier.fillMaxWidth(),
         )
     }

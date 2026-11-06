@@ -17,8 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -213,7 +211,7 @@ private fun EvidenceSheet(
     onDismiss: () -> Unit,
     onClear: () -> Unit,
 ) {
-    val clipboard = LocalClipboardManager.current
+    val copyText = rememberTextCopier()
     val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
 
     WindowBottomSheet(
@@ -278,7 +276,7 @@ private fun EvidenceSheet(
                                 )
                                 TextButton(
                                     text = "复制",
-                                    onClick = { clipboard.setText(AnnotatedString(item.sanitizedSnippet)) },
+                                    onClick = { copyText(item.sanitizedSnippet) },
                                     minWidth = 0.dp,
                                 )
                             }

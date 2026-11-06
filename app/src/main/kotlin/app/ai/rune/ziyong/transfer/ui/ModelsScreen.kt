@@ -33,9 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -61,7 +59,7 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 @Composable
 fun ModelsScreen(state: AppUiState, viewModel: AppViewModel) {
     val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
+    val copyText = rememberTextCopier()
     // 按 routePrefix 分组：区域型供应商（如 WorkBuddy 国内与国外）各成一个分组
     val grouped = remember(state.models) { state.models.groupBy { it.routePrefix } }
     val exposure = state.modelExposure
@@ -189,7 +187,7 @@ fun ModelsScreen(state: AppUiState, viewModel: AppViewModel) {
                         exposed = exposure.allows(model.fullId),
                         onToggleExposed = { viewModel.toggleModelExposed(model.fullId, it) },
                         onCopy = {
-                            clipboard.setText(AnnotatedString(model.fullId))
+                            copyText(model.fullId)
                             Toast.makeText(context, "已复制模型名称：${model.fullId}", Toast.LENGTH_SHORT).show()
                         },
                         onTest = { viewModel.testModel(model) },

@@ -1,3 +1,13 @@
+/*
+ * androidx.security:security-crypto 的 MasterKey / EncryptedSharedPreferences 已被标记废弃
+ * （Google 建议改用 DataStore + 自管密钥）。此处继续使用是有意的工程取舍：
+ *  - 它们仍是官方提供的、可直接加密 SharedPreferences 的稳定实现；
+ *  - 迁移到 DataStore 会改变已存凭证的磁盘格式，需要一次性解密-迁移-重写流程，
+ *    任何一步失败都会让用户丢失全部账号，远超「消除一条编译警告」的收益。
+ * 迁移应作为独立变更、带迁移测试与回滚路径单独进行。
+ */
+@file:Suppress("DEPRECATION")
+
 package app.ai.rune.ziyong.transfer.data
 
 import android.content.Context

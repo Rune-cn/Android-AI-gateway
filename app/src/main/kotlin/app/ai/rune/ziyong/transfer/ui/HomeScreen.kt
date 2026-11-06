@@ -25,9 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,7 +65,7 @@ fun HomeScreen(
     openTaskCenter: () -> Unit,
 ) {
     val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
+    val copyText = rememberTextCopier()
     val lanUrl = state.lanUrls.firstOrNull()
 
     // Android 13+ 通知权限被拒时前台服务照常跑，但常驻通知会被系统静默隐藏，
@@ -88,7 +86,7 @@ fun HomeScreen(
     }
 
     fun copy(text: String, message: String) {
-        clipboard.setText(AnnotatedString(text))
+        copyText(text)
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 

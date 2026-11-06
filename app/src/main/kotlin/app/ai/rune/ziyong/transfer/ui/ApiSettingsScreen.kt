@@ -11,9 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -31,7 +29,7 @@ import top.yukonga.miuix.kmp.basic.TextField
 fun ApiSettingsScreen(state: AppUiState, viewModel: AppViewModel, onBack: () -> Unit) {
     val settings = state.settings
     val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
+    val copyText = rememberTextCopier()
     var port by remember(settings.port) { mutableStateOf(settings.port.toString()) }
     var apiKey by remember(settings.apiKey) { mutableStateOf(settings.apiKey) }
 
@@ -43,12 +41,12 @@ fun ApiSettingsScreen(state: AppUiState, viewModel: AppViewModel, onBack: () -> 
         SectionCard {
             SectionLabel("接入地址")
             AddressTile(state.localUrl.ifEmpty { "http://127.0.0.1:${settings.port}/v1" }) {
-                clipboard.setText(AnnotatedString(state.localUrl))
+                copyText(state.localUrl)
                 Toast.makeText(context, "已复制本机地址", Toast.LENGTH_SHORT).show()
             }
             state.lanUrls.forEach { url ->
                 AddressTile(url) {
-                    clipboard.setText(AnnotatedString(url))
+                    copyText(url)
                     Toast.makeText(context, "已复制局域网地址", Toast.LENGTH_SHORT).show()
                 }
             }

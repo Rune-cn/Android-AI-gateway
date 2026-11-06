@@ -19,10 +19,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import dev.aigw.core.pool.AccountImportResult
 import dev.aigw.core.provider.ProviderAccount
@@ -66,7 +64,7 @@ fun AccountTransferScreen(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
+    val copyText = rememberTextCopier()
     val scope = rememberCoroutineScope()
 
     // 导出范围：全部 / 按勾选
@@ -170,7 +168,7 @@ fun AccountTransferScreen(
                     }
                     val json = currentExportJson()
                     exportJson = json
-                    clipboard.setText(AnnotatedString(json))
+                    copyText(json)
                     viewModel.notice("已复制 $exportCount 个账号到剪贴板")
                 },
                 modifier = Modifier.fillMaxWidth(),
